@@ -82,7 +82,7 @@ def latest():
     return jsonify(_load(UPD_FILE) or {})
 
 @app.post('/set_update')
-@login_required
+@_login_required
 def set_update():
     ver = request.form['ver'].strip()
     url = request.form['url'].strip()
@@ -127,7 +127,7 @@ def logout():
 
 # ─── Painel ───
 @app.get('/')
-@login_required
+@_login_required
 def panel():
     q = request.args.get('q', '').upper()
     keys = {k: v for k, v in _load().items() if q in k.upper()}
@@ -136,7 +136,7 @@ def panel():
 
 # ─── Criação e edição de chaves ───
 @app.post('/new')
-@login_required
+@_login_required
 def new():
     qty = int(request.form.get('qty', 1))
     days = int(request.form.get('days', 0))
@@ -153,7 +153,7 @@ def new():
     return redirect('/')
 
 @app.post('/new_admin')
-@login_required
+@_login_required
 def new_admin():
     qty = int(request.form.get('qty', 1))
     data = _load()
@@ -168,7 +168,7 @@ def new_admin():
     return redirect('/')
 
 @app.post('/edit/<key>')
-@login_required
+@_login_required
 def edit(key):
     d = _load()
     exp = request.form.get('expires')
@@ -178,7 +178,7 @@ def edit(key):
     return redirect(f'/?q={key}')
 
 @app.get('/toggle/<key>')
-@login_required
+@_login_required
 def toggle(key):
     d = _load()
     d[key]['status'] = 'banned' if d[key]['status'] == 'active' else 'active'
@@ -187,7 +187,7 @@ def toggle(key):
     return redirect(f'/?q={key}')
 
 @app.get('/del/<key>')
-@login_required
+@_login_required
 def delete(key):
     d = _load()
     d.pop(key, None)

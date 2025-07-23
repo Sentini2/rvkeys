@@ -1,4 +1,4 @@
-Você disse:
+
 #!/usr/bin/env python
 # RV Solutions • Servidor de licenças + painel + auto‑update  v4.0
 

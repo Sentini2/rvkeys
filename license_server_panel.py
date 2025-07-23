@@ -18,8 +18,12 @@ HOST, PORT     = '0.0.0.0', 5001
 SECRET_KEY     = os.urandom(24)                         # sessão Flask
 
 ### ‑‑‑ HELPERS ‑‑‑ ###
+from flask_cors import CORS
 app  = Flask(__name__)
+CORS(app)  
 app.secret_key = SECRET_KEY
+
+
 
 def _load() -> dict:
     if not os.path.exists(DATA_FILE):
@@ -140,6 +144,8 @@ def delete(key):
         flash('Chave removida.', 'danger')
     return redirect(url_for('panel'))
 
+
+
 ### ‑‑‑ TEMPLATES EMBUTIDOS (Jinja2) ‑‑‑ ###
 TPL_LOGIN = """
 <!doctype html><title>Login • Painel RV</title>
@@ -225,8 +231,14 @@ TPL_PANEL = """
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 """
+@app.get('/exists/<key>')
+def exists(key):
+    rec = _load().get(key.upper())
+    # usa .get('status') para não estourar KeyError
+    if rec and rec.get('status', 'active') != 'banned':
+        return jsonify(exists=True)
+    return jsonify(exists=False), 404
 
-### ‑‑‑ MAIN ‑‑‑ ###
 if __name__ == '__main__':
     print(f'» Painel em http://{HOST}:{PORT}  (login: {ADMIN_USER})')
     app.run(host=HOST, port=PORT, debug=False)

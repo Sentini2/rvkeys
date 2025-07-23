@@ -121,8 +121,9 @@ def login():
     return render_template_string(TPL_LOGIN)
 
 @app.get('/logout')
-def logout(): session.clear()
-return redirect('/login')
+def logout():
+    session.clear()
+    return redirect('/login')
 
 # ─── Painel principal ───
 @app.get('/')

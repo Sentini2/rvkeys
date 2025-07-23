@@ -46,29 +46,22 @@ def _login_required(fn):
 # ─── API licenças ───
 @app.post('/validate')
 def validate():
-    j    = request.get_json() or {}
-    key  = j.get('key','').upper()
-    hwid = j.get('hwid')
-    rec  = _load().get(key)
+    data = _load()
+    body = request.get_json(force=True) or {}
+    key  = body.get('key', '').upper()
+    rec  = data.get(key)
 
-    if not rec or rec['status']=='banned':
+    # ── validações básicas ──────────────────────────
+    if not rec or rec.get('status') == 'banned':
         return jsonify(ok=False, reason='INVALID'), 403
-    if rec['expires'] and time.time()>rec['expires']:
+    if rec['expires'] and time.time() > rec['expires']:
         return jsonify(ok=False, reason='EXPIRED'), 403
 
-    # admin key → pula verificação HWID
-    if rec.get('type','single') == 'admin':
-        token=_sha(key+str(rec['expires']))
-        return jsonify(ok=True, token=token, expires=rec['expires'])
+    # ── GERA TOKEN (sem HWID) ───────────────────────
+    token = _sha(key + str(rec['expires']))
 
-    # chave normal: verifica / grava HWID
-    if rec['hwid'] and rec['hwid']!=hwid:
-        return jsonify(ok=False, reason='HWID_MISMATCH'), 403
-    if not rec['hwid']:
-        rec['hwid']=hwid; _save(_load())          # grava HWID
-
-    token=_sha(key+hwid+str(rec['expires']))
     return jsonify(ok=True, token=token, expires=rec['expires'])
+
 
 # usado pelo painel HTML para checar existência
 @app.get('/exists/<key>')

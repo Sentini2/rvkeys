@@ -91,7 +91,8 @@ def exists(key):
 @app.get('/latest')
 def latest(): return jsonify(_load(UPD_FILE) or {})
 
-@app.post('/set_update'); @_login_required
+@app.post('/set_update')
+@_login_required
 def set_update():
     ver = request.form['ver'].strip()
     url = request.form['url'].strip()
@@ -119,10 +120,13 @@ def login():
         flash('Credenciais inválidas.', 'danger')
     return render_template_string(TPL_LOGIN)
 
-@app.get('/logout'); def logout(): session.clear(); return redirect('/login')
+@app.get('/logout')
+def logout(): session.clear()
+return redirect('/login')
 
 # ─── Painel principal ───
-@app.get('/'); @_login_required
+@app.get('/')
+@_login_required
 def panel():
     q = request.args.get('q', '').upper()
     keys = {k: v for k, v in _load().items() if q in k.upper()}
@@ -130,7 +134,8 @@ def panel():
     return render_template_string(TPL_PANEL, keys=keys, q=q, upd=upd, time=time)
 
 # =================== rotas chaves ===================
-@app.post('/new'); @_login_required
+@app.post('/new')
+@_login_required
 def new():
     qty  = int(request.form.get('qty', 1))
     days = int(request.form.get('days', 0))
@@ -148,10 +153,12 @@ def new():
     session['last_keys'] = out
     return redirect('/')
 
-@app.post('/new_admin'); @_login_required
+@app.post('/new_admin')
+@_login_required
 def new_admin():
     qty  = int(request.form.get('qty', 1))
-    data = _load(); out = []
+    data = _load()
+    out = []
     for _ in range(qty):
         k = rnd()
         data[k] = dict(expires=0, hwid=None,
@@ -163,7 +170,8 @@ def new_admin():
     session['last_keys'] = out
     return redirect('/')
 
-@app.post('/edit/<key>'); @_login_required
+@app.post('/edit/<key>')
+@_login_required
 def edit(key):
     d   = _load()
     exp = request.form.get('expires')
@@ -172,7 +180,8 @@ def edit(key):
     flash('Chave atualizada.', 'success')
     return redirect(f'/?q={key}')
 
-@app.get('/toggle/<key>'); @_login_required
+@app.get('/toggle/<key>')
+@_login_required
 def toggle(key):
     d = _load()
     d[key]['status'] = 'banned' if d[key]['status'] == 'active' else 'active'
@@ -180,9 +189,12 @@ def toggle(key):
     flash('Status alterado.', 'warning')
     return redirect(f'/?q={key}')
 
-@app.get('/del/<key>'); @_login_required
+@app.get('/del/<key>')
+@_login_required
 def delete(key):
-    d = _load(); d.pop(key, None); _save(d)
+    d = _load()
+    d.pop(key, None)
+    _save(d)
     flash('Chave removida.', 'danger')
     return redirect('/')
 
